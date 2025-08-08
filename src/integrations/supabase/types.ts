@@ -14,16 +14,233 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_logs: {
+        Row: {
+          action: string
+          admin_id: string | null
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          event_date: string | null
+          id: string
+          location: string | null
+          organizer_id: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          location?: string | null
+          organizer_id?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          location?: string | null
+          organizer_id?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          company: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          location: string | null
+          posted_by: string | null
+          requirements: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          company: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          posted_by?: string | null
+          requirements?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          company?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          posted_by?: string | null
+          requirements?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          bio: string | null
+          company: string | null
+          contact_email: string | null
+          contact_linkedin: string | null
+          contact_phone: string | null
+          contact_whatsapp: string | null
+          created_at: string | null
+          department: string | null
+          email_verified: boolean | null
+          full_name: string
+          graduation_year: number | null
+          id: string
+          industry: string | null
+          job_title: string | null
+          linkedin_url: string | null
+          location: string | null
+          pref_anonymous: boolean | null
+          primary_contact_method:
+            | Database["public"]["Enums"]["contact_method"]
+            | null
+          privacy_settings: Json | null
+          profile_picture_url: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          show_email: boolean | null
+          show_linkedin: boolean | null
+          show_phone: boolean | null
+          show_whatsapp: boolean | null
+          skills: string[] | null
+          updated_at: string | null
+          user_id: string
+          verified: boolean | null
+        }
+        Insert: {
+          bio?: string | null
+          company?: string | null
+          contact_email?: string | null
+          contact_linkedin?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string | null
+          department?: string | null
+          email_verified?: boolean | null
+          full_name: string
+          graduation_year?: number | null
+          id?: string
+          industry?: string | null
+          job_title?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          pref_anonymous?: boolean | null
+          primary_contact_method?:
+            | Database["public"]["Enums"]["contact_method"]
+            | null
+          privacy_settings?: Json | null
+          profile_picture_url?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          show_email?: boolean | null
+          show_linkedin?: boolean | null
+          show_phone?: boolean | null
+          show_whatsapp?: boolean | null
+          skills?: string[] | null
+          updated_at?: string | null
+          user_id: string
+          verified?: boolean | null
+        }
+        Update: {
+          bio?: string | null
+          company?: string | null
+          contact_email?: string | null
+          contact_linkedin?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string | null
+          department?: string | null
+          email_verified?: boolean | null
+          full_name?: string
+          graduation_year?: number | null
+          id?: string
+          industry?: string | null
+          job_title?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          pref_anonymous?: boolean | null
+          primary_contact_method?:
+            | Database["public"]["Enums"]["contact_method"]
+            | null
+          privacy_settings?: Json | null
+          profile_picture_url?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          show_email?: boolean | null
+          show_linkedin?: boolean | null
+          show_phone?: boolean | null
+          show_whatsapp?: boolean | null
+          skills?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      contact_method: "email" | "linkedin" | "phone" | "whatsapp"
+      user_role: "admin" | "verified_alumni" | "alumni" | "guest"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +367,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      contact_method: ["email", "linkedin", "phone", "whatsapp"],
+      user_role: ["admin", "verified_alumni", "alumni", "guest"],
+    },
   },
 } as const
