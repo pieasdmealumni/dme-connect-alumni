@@ -54,6 +54,7 @@ export default function Auth() {
     const fullName = formData.get('fullName') as string;
     const confirmPassword = formData.get('confirmPassword') as string;
 
+    // Validation
     if (password !== confirmPassword) {
       toast({
         title: "Password Mismatch",
@@ -74,7 +75,31 @@ export default function Auth() {
       return;
     }
 
-    const { error } = await signUp(email, password, fullName);
+    // Check if terms are accepted
+    if (!formData.get('terms')) {
+      toast({
+        title: "Terms Required",
+        description: "Please accept the terms and conditions to continue.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Prepare profile data
+    const profileData = {
+      graduationYear: formData.get('graduationYear') as string,
+      industry: formData.get('industry') as string,
+      location: formData.get('location') as string,
+      company: formData.get('company') as string,
+      jobTitle: formData.get('jobTitle') as string,
+      phone: formData.get('phone') as string,
+      whatsapp: formData.get('whatsapp') as string,
+      showPhone: !!formData.get('showPhone'),
+      showWhatsapp: !!formData.get('showWhatsapp'),
+    };
+
+    const { error } = await signUp(email, password, fullName, profileData);
 
     if (error) {
       toast({
@@ -162,18 +187,77 @@ export default function Auth() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
-                    <Input
-                      id="signup-name"
-                      name="fullName"
-                      type="text"
-                      placeholder="Your Full Name"
-                      required
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-name">Full Name *</Label>
+                      <Input
+                        id="signup-name"
+                        name="fullName"
+                        type="text"
+                        placeholder="Your Full Name"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="graduation-year">Graduation Year *</Label>
+                      <Input
+                        id="graduation-year"
+                        name="graduationYear"
+                        type="number"
+                        placeholder="e.g., 2020"
+                        min="1980"
+                        max="2030"
+                        required
+                      />
+                    </div>
                   </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="industry">Industry/Field *</Label>
+                      <Input
+                        id="industry"
+                        name="industry"
+                        type="text"
+                        placeholder="e.g., Software Engineering"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="location">Location *</Label>
+                      <Input
+                        id="location"
+                        name="location"
+                        type="text"
+                        placeholder="City, Country"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="company">Current Company</Label>
+                      <Input
+                        id="company"
+                        name="company"
+                        type="text"
+                        placeholder="Your current employer"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="job-title">Job Title</Label>
+                      <Input
+                        id="job-title"
+                        name="jobTitle"
+                        type="text"
+                        placeholder="Your current position"
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email">Email Address *</Label>
                     <Input
                       id="signup-email"
                       name="email"
@@ -182,26 +266,89 @@ export default function Auth() {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      name="password"
-                      type="password"
-                      placeholder="Minimum 8 characters"
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        placeholder="+92 XXX XXXXXXX"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="whatsapp">WhatsApp Number</Label>
+                      <Input
+                        id="whatsapp"
+                        name="whatsapp"
+                        type="tel"
+                        placeholder="+92 XXX XXXXXXX"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="show-whatsapp"
+                        name="showWhatsapp"
+                        className="rounded border-input"
+                      />
+                      <Label htmlFor="show-whatsapp" className="text-sm">
+                        Allow displaying WhatsApp contact in directory
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="show-phone"
+                        name="showPhone"
+                        className="rounded border-input"
+                      />
+                      <Label htmlFor="show-phone" className="text-sm">
+                        Allow displaying Phone Number in directory
+                      </Label>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Password *</Label>
+                      <Input
+                        id="signup-password"
+                        name="password"
+                        type="password"
+                        placeholder="Minimum 8 characters"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">Confirm Password *</Label>
+                      <Input
+                        id="confirm-password"
+                        name="confirmPassword"
+                        type="password"
+                        placeholder="Confirm your password"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="terms"
+                      name="terms"
+                      className="rounded border-input"
                       required
                     />
+                    <Label htmlFor="terms" className="text-sm">
+                      I accept the terms and conditions and privacy policy
+                    </Label>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm Password</Label>
-                    <Input
-                      id="confirm-password"
-                      name="confirmPassword"
-                      type="password"
-                      placeholder="Confirm your password"
-                      required
-                    />
-                  </div>
+
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Creating Account..." : "Create Account"}
                   </Button>

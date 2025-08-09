@@ -14,6 +14,17 @@ interface Profile {
   industry?: string;
   company?: string;
   job_title?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  contact_whatsapp?: string;
+  linkedin_url?: string;
+  bio?: string;
+  primary_contact_method?: string;
+  show_email?: boolean;
+  show_phone?: boolean;
+  show_whatsapp?: boolean;
+  show_linkedin?: boolean;
+  pref_anonymous?: boolean;
   verified: boolean;
 }
 
@@ -23,7 +34,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, profileData?: any) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
 }
@@ -94,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, profileData?: any) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -104,6 +115,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         emailRedirectTo: redirectUrl,
         data: {
           full_name: fullName,
+          graduation_year: profileData?.graduationYear,
+          industry: profileData?.industry,
+          location: profileData?.location,
+          company: profileData?.company,
+          job_title: profileData?.jobTitle,
+          contact_phone: profileData?.phone,
+          contact_whatsapp: profileData?.whatsapp,
+          show_phone: profileData?.showPhone,
+          show_whatsapp: profileData?.showWhatsapp,
         },
       },
     });
