@@ -1,12 +1,41 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Briefcase, MapPin, Building, Search, Plus, Clock } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Briefcase,
+  MapPin,
+  Building,
+  Search,
+  Plus,
+  Clock,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Job {
   id: string;
@@ -23,9 +52,20 @@ interface Job {
 export default function Jobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [locationFilter, setLocationFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [locationFilter, setLocationFilter] = useState("all");
   const { toast } = useToast();
+
+  // New Job form state
+  const [newJob, setNewJob] = useState({
+    title: "",
+    description: "",
+    requirements: "",
+    company: "",
+    location: "",
+    posted_by: "Ali Raza", // Replace with auth user if needed
+  });
+  const [posting, setPosting] = useState(false);
 
   useEffect(() => {
     fetchJobs();
@@ -34,15 +74,15 @@ export default function Jobs() {
   const fetchJobs = async () => {
     try {
       const { data, error } = await supabase
-        .from('jobs')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .from("jobs")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setJobs(data || []);
     } catch (error) {
-      console.error('Error fetching jobs:', error);
+      console.error("Error fetching jobs:", error);
       toast({
         title: "Error",
         description: "Failed to load job postings",
@@ -53,24 +93,79 @@ export default function Jobs() {
     }
   };
 
-  const filteredJobs = jobs.filter(job => {
-    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesLocation = locationFilter === 'all' || 
-                           job.location.toLowerCase().includes(locationFilter.toLowerCase());
-    
+  const handlePostJob = async () => {
+    if (!newJob.title || !newJob.company || !newJob.location) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setPosting(true);
+    const jobData = {
+      ...newJob,
+      id: crypto.randomUUID(),
+      is_active: true,
+      created_at: new Date().toISOString(),
+    };
+
+    // Instantly update UI
+    setJobs((prev) => [jobData as Job, ...prev]);
+
+    try {
+      const { error } = await supabase.from("jobs").insert([jobData]);
+      if (error) throw error;
+
+      toast({ title: "Success", description: "Job posted successfully!" });
+
+      // Reset form
+      setNewJob({
+        title: "",
+        description: "",
+        requirements: "",
+        company: "",
+        location: "",
+        posted_by: "Ali Raza",
+      });
+
+      // Ensure database is synced
+      fetchJobs();
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Could not post job",
+        variant: "destructive",
+      });
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  const filteredJobs = jobs.filter((job) => {
+    const matchesSearch =
+      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesLocation =
+      locationFilter === "all" ||
+      job.location.toLowerCase().includes(locationFilter.toLowerCase());
+
     return matchesSearch && matchesLocation;
   });
 
   const getTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (diffInDays === 0) return 'Today';
-    if (diffInDays === 1) return 'Yesterday';
+    const diffInDays = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffInDays === 0) return "Today";
+    if (diffInDays === 1) return "Yesterday";
     if (diffInDays < 7) return `${diffInDays} days ago`;
     if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
     return `${Math.floor(diffInDays / 30)} months ago`;
@@ -89,15 +184,80 @@ export default function Jobs() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Job Opportunities</h1>
-          <p className="text-muted-foreground">Discover career opportunities shared by fellow alumni</p>
+          <p className="text-muted-foreground">
+            Discover career opportunities shared by fellow alumni
+          </p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Post Job
-        </Button>
+
+        {/* Post Job Dialog */}
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Post Job
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Post a Job</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Title</Label>
+                <Input
+                  value={newJob.title}
+                  onChange={(e) =>
+                    setNewJob({ ...newJob, title: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label>Company</Label>
+                <Input
+                  value={newJob.company}
+                  onChange={(e) =>
+                    setNewJob({ ...newJob, company: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label>Location</Label>
+                <Input
+                  value={newJob.location}
+                  onChange={(e) =>
+                    setNewJob({ ...newJob, location: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  value={newJob.description}
+                  onChange={(e) =>
+                    setNewJob({ ...newJob, description: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label>Requirements</Label>
+                <Textarea
+                  value={newJob.requirements}
+                  onChange={(e) =>
+                    setNewJob({ ...newJob, requirements: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={handlePostJob} disabled={posting}>
+                {posting ? "Posting..." : "Submit Job"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {/* Search and Filters */}
+      {/* Search & Filters */}
       <Card>
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -138,10 +298,9 @@ export default function Jobs() {
             <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No jobs found</h3>
             <p className="text-muted-foreground mb-4">
-              {searchTerm || locationFilter !== 'all' 
+              {searchTerm || locationFilter !== "all"
                 ? "Try adjusting your search criteria or filters."
-                : "Be the first to share a job opportunity with the alumni network."
-              }
+                : "Be the first to share a job opportunity with the alumni network."}
             </p>
             <Button>Post a Job</Button>
           </CardContent>
@@ -177,23 +336,21 @@ export default function Jobs() {
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {job.description}
                   </p>
-                  
                   {job.requirements && (
                     <div>
-                      <h4 className="font-semibold text-sm mb-2">Key Requirements:</h4>
+                      <h4 className="font-semibold text-sm mb-2">
+                        Key Requirements:
+                      </h4>
                       <p className="text-sm text-muted-foreground line-clamp-2">
                         {job.requirements}
                       </p>
                     </div>
                   )}
-
                   <div className="flex items-center justify-between pt-4">
                     <Button variant="outline" size="sm">
                       View Details
                     </Button>
-                    <Button size="sm">
-                      Apply Now
-                    </Button>
+                    <Button size="sm">Apply Now</Button>
                   </div>
                 </div>
               </CardContent>
@@ -201,44 +358,6 @@ export default function Jobs() {
           ))}
         </div>
       )}
-
-      {/* Featured Jobs Section */}
-      <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Briefcase className="h-5 w-5" />
-            Featured Opportunities
-          </CardTitle>
-          <CardDescription>
-            Premium job postings from top employers in our network
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="border rounded-lg p-4">
-                <h4 className="font-semibold">Senior Mechanical Engineer</h4>
-                <p className="text-sm text-muted-foreground">Tesla • Remote/Fremont, CA</p>
-                <Badge variant="secondary" className="mt-2">$120k - $180k</Badge>
-              </div>
-              <div className="border rounded-lg p-4">
-                <h4 className="font-semibold">Project Manager</h4>
-                <p className="text-sm text-muted-foreground">Google • Mountain View, CA</p>
-                <Badge variant="secondary" className="mt-2">$140k - $200k</Badge>
-              </div>
-            </div>
-            <div className="flex flex-col justify-center">
-              <p className="text-sm text-muted-foreground mb-4">
-                Get priority access to exclusive job postings from companies 
-                actively recruiting PIEAS DME alumni.
-              </p>
-              <Button className="w-full">
-                View All Featured Jobs
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
