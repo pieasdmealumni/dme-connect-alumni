@@ -7,7 +7,8 @@ import {
   Calendar,
   Briefcase,
   LogOut,
-  Shield
+  Shield,
+  Globe
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,6 +29,7 @@ import { Button } from "@/components/ui/button";
 const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Alumni Directory", url: "/directory", icon: Users },
+  { title: "Alumni Analytics", url: "/analytics", icon: Globe },
   { title: "My Profile", url: "/profile", icon: User },
   { title: "Events", url: "/events", icon: Calendar },
   { title: "Jobs", url: "/jobs", icon: Briefcase },

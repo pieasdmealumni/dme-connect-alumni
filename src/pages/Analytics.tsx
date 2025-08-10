@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Download, Globe, TrendingUp, Users, MapPin } from 'lucide-react';
+import AlumniMap from '@/components/AlumniMap';
 
 interface AnalyticsData {
   alumniByYear: { year: number; count: number }[];
@@ -29,6 +30,7 @@ export default function Analytics() {
     contactPreferences: [],
     totalStats: { total: 0, verified: 0, recentJoins: 0, activeProfiles: 0 }
   });
+  const [alumniProfiles, setAlumniProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedView, setSelectedView] = useState('overview');
 
@@ -43,6 +45,9 @@ export default function Analytics() {
         .select('*');
 
       if (error) throw error;
+
+      // Store profiles for map
+      setAlumniProfiles(profiles || []);
 
       // Process data for analytics
       const alumniByYear = processAlumniByYear(profiles || []);
@@ -357,7 +362,7 @@ export default function Analytics() {
         </Card>
       </div>
 
-      {/* Alumni World Map Placeholder */}
+      {/* Alumni World Map */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -367,16 +372,7 @@ export default function Analytics() {
           <CardDescription>Global distribution of PIEAS DME alumni</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-96 bg-muted rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <Globe className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium">Interactive World Map</h3>
-              <p className="text-muted-foreground">World map visualization showing alumni locations globally</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {data.alumniByLocation.length} countries represented
-              </p>
-            </div>
-          </div>
+          <AlumniMap alumniData={alumniProfiles} />
         </CardContent>
       </Card>
     </div>
