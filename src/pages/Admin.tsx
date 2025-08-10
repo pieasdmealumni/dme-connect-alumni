@@ -94,7 +94,7 @@ export default function Admin() {
     setFilteredProfiles(filtered);
   };
 
-  const updateProfileRole = async (profileId: string, newRole: string) => {
+  const updateProfileRole = async (profileId: string, newRole: 'admin' | 'verified_alumni' | 'alumni' | 'guest') => {
     try {
       const { error } = await supabase
         .from('profiles')
@@ -390,7 +390,7 @@ export default function Admin() {
                   <TableCell>
                     <Select 
                       value={profile.role} 
-                      onValueChange={(value) => updateProfileRole(profile.id, value)}
+                      onValueChange={(value) => updateProfileRole(profile.id, value as 'admin' | 'verified_alumni' | 'alumni' | 'guest')}
                     >
                       <SelectTrigger className="w-32">
                         <SelectValue>

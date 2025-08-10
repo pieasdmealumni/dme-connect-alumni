@@ -83,7 +83,7 @@ export default function Profile() {
           contact_whatsapp: formData.contact_whatsapp,
           linkedin_url: formData.linkedin_url,
           bio: formData.bio,
-          primary_contact_method: formData.primary_contact_method,
+          primary_contact_method: formData.primary_contact_method as 'email' | 'linkedin' | 'phone' | 'whatsapp',
           show_email: formData.show_email,
           show_phone: formData.show_phone,
           show_whatsapp: formData.show_whatsapp,
