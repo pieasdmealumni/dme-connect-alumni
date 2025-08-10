@@ -12,6 +12,8 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Directory from "./pages/Directory";
 import Analytics from "./pages/Analytics";
+import Events from "./pages/Events";
+import Jobs from "./pages/Jobs";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
@@ -63,6 +65,26 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <Analytics />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/events" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Events />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/jobs" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Jobs />
                   </Layout>
                 </ProtectedRoute>
               } 

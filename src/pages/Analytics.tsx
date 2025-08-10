@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Download, Globe, TrendingUp, Users, MapPin } from 'lucide-react';
 import AlumniMap from '@/components/AlumniMap';
 
@@ -283,13 +283,23 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={data.alumniByYear}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
-                <YAxis />
+              <PieChart>
+                <Pie
+                  data={data.alumniByYear}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ year, count }) => `${year}: ${count}`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="count"
+                >
+                  {data.alumniByYear.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
                 <Tooltip />
-                <Bar dataKey="count" fill="hsl(var(--primary))" />
-              </BarChart>
+              </PieChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
@@ -302,61 +312,23 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={data.alumniByIndustry} layout="horizontal" margin={{ left: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="industry" type="category" width={100} />
-                <Tooltip />
-                <Bar dataKey="count" fill="hsl(var(--secondary))" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Alumni by Location */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Geographic Distribution</CardTitle>
-            <CardDescription>Alumni locations worldwide</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={data.alumniByLocation}
+                  data={data.alumniByIndustry}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ location, count }) => `${location}: ${count}`}
-                  outerRadius={80}
+                  label={({ industry, count }) => `${industry}: ${count}`}
+                  outerRadius={100}
                   fill="#8884d8"
                   dataKey="count"
                 >
-                  {data.alumniByLocation.map((entry, index) => (
+                  {data.alumniByIndustry.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
               </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Contact Preferences */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Contact Preferences</CardTitle>
-            <CardDescription>How alumni prefer to be contacted</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={data.contactPreferences}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="method" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="hsl(var(--accent))" />
-              </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>

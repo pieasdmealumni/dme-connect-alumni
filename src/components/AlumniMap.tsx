@@ -25,6 +25,7 @@ const AlumniMap: React.FC<AlumniMapProps> = ({ alumniData }) => {
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string>('');
   const [tokenSaved, setTokenSaved] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Sample coordinates for major cities (in a real app, you'd geocode the locations)
   const cityCoordinates: { [key: string]: [number, longitude: number] } = {
@@ -180,6 +181,36 @@ const AlumniMap: React.FC<AlumniMapProps> = ({ alumniData }) => {
   };
 
   useEffect(() => {
+    const fetchMapboxToken = async () => {
+      try {
+        // First try to get token from Supabase Edge Function
+        const response = await fetch(`https://bfngelckhyuvmpqdzjpo.supabase.co/functions/v1/get-mapbox-token`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmbmdlbGNraHl1dm1wcWR6anBvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NTk5MDYsImV4cCI6MjA3MDIzNTkwNn0.cchaCJQNkPq10xFTgd3jefAmVG9O0lIVSwEzWlSksC0`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const { token } = await response.json();
+          setMapboxToken(token);
+          setTokenSaved(true);
+          setIsLoading(false);
+          return;
+        }
+      } catch (error) {
+        console.log('No Mapbox token found in secrets, using manual input');
+      }
+      
+      // If no token in secrets, show manual input
+      setIsLoading(false);
+    };
+
+    fetchMapboxToken();
+  }, []);
+
+  useEffect(() => {
     if (tokenSaved) {
       initializeMap();
     }
@@ -189,6 +220,14 @@ const AlumniMap: React.FC<AlumniMapProps> = ({ alumniData }) => {
       map.current?.remove();
     };
   }, [tokenSaved, alumniData]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[400px]">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!tokenSaved) {
     return (
